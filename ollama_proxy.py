@@ -1,11 +1,9 @@
-import os
-import re
 import json
 import httpx
 import logging
 from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 PORT = 11435

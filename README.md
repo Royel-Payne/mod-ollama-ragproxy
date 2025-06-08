@@ -78,8 +78,7 @@ Example:
   "total_requests": 9,
   "lookup_attempts": 6,
   "preferred_domain_matches": 3,
-  "cache_hits": 2,
-  "api_calls": 6
+  "cache_hits": 2
 }
 ```
 
