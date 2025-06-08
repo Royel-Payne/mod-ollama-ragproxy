@@ -1,68 +1,94 @@
 # Ollama RAG Proxy for mod-ollama-chat
 
-This project provides a lightweight Flask-based proxy that adds basic retrieval-augmented generation (RAG) to [mod-ollama-chat](https://github.com/DustinHendrickson/mod-ollama-chat) using DuckDuckGo Lite scraping. It injects relevant search snippets as context for the prompt before sending to Ollama.
+This project provides a lightweight Flask-based proxy that adds retrieval-augmented generation (RAG) to [mod-ollama-chat](https://github.com/DustinHendrickson/mod-ollama-chat). It scrapes search results from Startpage, filters by domain preference, injects relevant snippets as context, and streams LLM responses from your local Ollama model.
 
 ## Features
-- 🔍 Scrapes DuckDuckGo Lite HTML for lightweight search results
-- 🧠 Injects context before querying your local Ollama model
-- ⚡ Caches results in memory to reduce duplicate lookups
-- 📈 Includes a `/stats` endpoint to track usage
-- ✅ Designed for use with `mod-ollama-chat`
 
-## Requirements
+-  Uses **Startpage** search (HTML form POST scraping)
+-  Attempts to filter results to preferred domains (e.g., wowhead.com)
+-  Injects contextual info before querying your Ollama model
+-  Caches prompt-response pairs in memory
+-  Designed for use with `mod-ollama-chat`
+
+## Installation
+
+### Pre-requisites
+
+Make sure you have Python 3.8+ and `pip` installed. You can check with:
+
 ```bash
-pip install flask httpx beautifulsoup4
+python3 --version
+pip3 --version
 ```
 
-## Usage
+Create and activate a virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+
+### Clone the repository
+
+```bash
+git clone https://github.com/Royel-Payne/mod-ollama-ragproxy
+cd mod-ollama-ragproxy
+```
+
+### Install the dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Start the Flask server
+
 ```bash
 python3 ollama_proxy.py
 ```
-The server will run on:
-```
-http://localhost:11435
-```
+
+The proxy will run on port `11435`.
 
 ## Integration with mod-ollama-chat
-Edit your `mod_ollama_chat.conf` to point to this proxy:
+
+Edit your `mod_ollama_chat.conf` to point to the proxy:
+
 ```
 OllamaChat.Url = http://127.0.0.1:11435/api/generate
 ```
-Or if used from another container or VM:
+
+For remote servers or containers:
+
 ```
 OllamaChat.Url = http://YOUR.IP.ADDR.HERE:11435/api/generate
 ```
 
 ## Stats Endpoint
-Check usage and caching stats:
+
+Track usage metrics:
+
 ```bash
-curl -s http://127.0.0.1:11435/stats | jq
+curl http://127.0.0.1:11435/stats | jq
 ```
-Example output:
+
+Example:
+
 ```json
 {
-  "total_requests": 3,
-  "lookup_attempts": 3,
-  "preferred_domain_matches": 2,
-  "cache_hits": 1
+  "total_requests": 9,
+  "lookup_attempts": 6,
+  "preferred_domain_matches": 3,
+  "cache_hits": 2,
+  "api_calls": 6
 }
 ```
 
 ## Port Notice
-This proxy runs on port `11435` to avoid conflict with Ollama’s default `11434`.
 
-## Development Notes
-- Searches are limited to preferred domains like `wowhead.com`, `warcraft.wiki.gg`, etc.
-- The last DuckDuckGo search is saved to `last_search.html` for debugging.
-- A `.gitignore` is recommended:
-```gitignore
-__pycache__/
-*.pyc
-.env
-*.log
-last_search.html
-```
+This proxy runs on port `11435` (to avoid Ollama’s default port `11434`).
 
 ## Attribution
+
 Inspired by and intended to work with:
-- https://github.com/DustinHendrickson/mod-ollama-chat
+
+https://github.com/DustinHendrickson/mod-ollama-chat
